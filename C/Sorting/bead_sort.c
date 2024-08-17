@@ -1,65 +1,73 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define BEAD(i, j) beads[i * maximum + j]
+#define PIVOT_BEAD(row, col) beads[(row) * max_value + (col)]
 
-void display(const int *array, int x) {
-    for (int i = 0; i < x; i++) {
-        printf("%d ", array[i]);
+void print_array(const int *array, int size) {
+    for(int idx = 0; idx < size; idx++) {
+        printf("%d ", array[idx]);
     }
     printf("\n");
 }
 
-void bead_sort(int *a, size_t length) {
-    int i, j, maximum, sum;
-    unsigned char *beads;
-
-    for (i = 1, maximum = a[0]; i < length; i++)
-        if (a[i] > maximum)
-            maximum = a[i];
-
-    beads = calloc(1, maximum * length);
-
-    for (i = 0; i < length; i++) {
-        for (j = 0; j < a[i]; j++) BEAD(i, j) = 1;
-    }
-
-
-    for (j = 0; j < maximum; j++) {
-        for (sum = i = 0; i < length; i++) {
-            sum += BEAD(i, j);
-            BEAD(i, j) = 0;
+void bead_sort(int *array, size_t size) {
+    int max_value = array[0];
+    for(int idx = 1; idx < size; idx++) {
+        if(array[idx] > max_value) {
+            max_value = array[idx];
         }
-        for (i = length - sum; i < length; i++) BEAD(i, j) = 1;
     }
 
-    for (i = 0; i < length; i++) {
-        for (j = 0; j < maximum && BEAD(i, j); j++);
-        a[i] = j;
+    unsigned char *beads = calloc(max_value * size, sizeof(unsigned char));
+
+    for(int row = 0; row < size; row++) {
+        for(int col = 0; col < array[row]; col++) {
+            PIVOT_BEAD(row, col) = 1;
+        }
     }
-    free(beads);
-}
 
-int main(int argc, const char *argv[]) {
-    int x;
-    printf("Enter Size Of Array: ");
-    scanf("%d", &x);  
+    for(int col = 0; col < max_value; col++) {
+        int count = 0;
+        for(int row = 0; row < size; row++) {
+            count += PIVOT_BEAD(row, col);
+            PIVOT_BEAD(row, col) = 0;
+        }
+        for(int row = size - count; row < size; row++) {
+            PIVOT_BEAD(row, col) = 1;
+        }
+    }
 
-    printf("Enter Elements: \n");
-    int i;
-    int *array = (int *)malloc(x * sizeof(int));
-    for (i = 0; i < x; i++) {
-        scanf("%d", &array[i]);
+    for(int row = 0; row < size; row++) {
+        int col = 0;
+        while(col < max_value && PIVOT_BEAD(row, col)) {
+            col++;
+        }
+        array[row] = col;
+    }
+
+    free(beads); 
+ }
+
+ int main() {
+    int array_size;
+    printf("Enter Array Size: ");
+    scanf("%d", &array_size);
+
+    int *array = malloc(array_size * sizeof(int));
+
+    printf("Enter Array Elements:\n");
+    for(int idx = 0; idx < array_size; idx++) {
+        scanf("%d", &array[idx]);
     }
 
     printf("Original Array: ");
-    display(array, x);
+    print_array(array, array_size);
 
-    bead_sort(array, x);
+    bead_sort(array, array_size);
 
     printf("Sorted Array: ");
-    display(array, x);
+    print_array(array, array_size);
 
     free(array);
     return 0;
-}
+ }
