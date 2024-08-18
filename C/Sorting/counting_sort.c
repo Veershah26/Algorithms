@@ -1,31 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-
-#define SHRINK 1.3  
 
 void print_array(const int *array, int n) {
     for (int i = 0; i < n; ++i) {
         printf("%d ", array[i]);
     }
     printf("\n");
-}
-
-void comb_sort(int *numbers, int size) {
-    int gap = size;
-    while (gap > 1) {  
-        gap = gap / SHRINK;
-        if (gap < 1) {
-            gap = 1;
-        }
-        for (int i = 0; i + gap < size; ++i) {
-            if (numbers[i] > numbers[i + gap]) {
-                int tmp = numbers[i];
-                numbers[i] = numbers[i + gap];
-                numbers[i + gap] = tmp;
-            }
-        }
-    }
 }
 
 int *load_from_file(const char *filename, int *array_size) {
@@ -55,6 +37,33 @@ int *load_from_file(const char *filename, int *array_size) {
 
     fclose(file);
     return array;
+}
+
+void counting_sort(int *array, int size) {
+    int max_val = 0;
+    for (int i = 0; i < size; i++) {
+        if (array[i] > max_val) {
+            max_val = array[i];
+        }
+    }
+
+    int *count = (int *)malloc((max_val + 1) * sizeof(int));
+    memset(count, 0, (max_val + 1) * sizeof(int));
+
+    for (int i = 0; i < size; i++) {
+        count[array[i]]++;
+    }
+
+    printf("Sorted array:\n");
+    for (int i = 0; i <= max_val; i++) {
+        while (count[i] > 0) {
+            printf("%d ", i);
+            count[i]--;
+        }
+    }
+    printf("\n");
+
+    free(count);
 }
 
 void test() {
@@ -97,11 +106,8 @@ void test() {
     print_array(array, array_size);
 
     clock_t start = clock();
-    comb_sort(array, array_size);
+    counting_sort(array, array_size);
     clock_t end = clock();
-
-    printf("Sorted Array:\n");
-    print_array(array, array_size);
 
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("Time Taken: %0.6f Seconds\n", time_taken);
@@ -109,7 +115,7 @@ void test() {
     free(array);
 }
 
-int main(int argc, const char *argv[]) {
+int main() {
     srand(time(NULL));
     test();
     return 0;
